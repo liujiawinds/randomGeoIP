@@ -22,7 +22,7 @@ import java.util.Random;
  * Created by liujia on 2018/4/18.
  * Generate Chinese random ip and geo.
  * ref: https://github.com/taliu/chinese-random-ip
- *      https://www.maxmind.com/zh/geoip-demo
+ * https://www.maxmind.com/zh/geoip-demo
  */
 public class Boot {
 
@@ -30,7 +30,7 @@ public class Boot {
     private static DatabaseReader geoDB;
     private static JSONObject ipDB;
 
-    private static void init() throws IOException, URISyntaxException {
+    public static void init() throws IOException, URISyntaxException {
         initIPDB();
         initGeoDB();
     }
@@ -49,7 +49,7 @@ public class Boot {
     }
 
 
-    private String getRandomChineseIP() throws IOException {
+    public String getRandomChineseIP() throws IOException {
         List<String> provinces = new ArrayList<>(ipDB.keySet());
         int i = random.nextInt(provinces.size());
         String province = provinces.get(i);
@@ -65,10 +65,20 @@ public class Boot {
         return longToIp(l);
     }
 
-
-    private String getGeoForIP(String ip) throws IOException, GeoIp2Exception {
+    /**
+     * @return returns geo for ip, null if not exists in db.
+     */
+    public String getGeoForIP(String ip) throws IOException {
         InetAddress ipAddress = InetAddress.getByName(ip);
-        CityResponse response = geoDB.city(ipAddress);
+        CityResponse response = null;
+        try {
+            response = geoDB.city(ipAddress);
+        } catch (GeoIp2Exception e) {
+            System.out.println("not found ip address in db.");
+        }
+        if (response == null) {
+            return null;
+        }
         Location location = response.getLocation();
         return location.getLatitude() + "," + location.getLongitude();
     }
@@ -97,12 +107,13 @@ public class Boot {
     public static void main(String[] args) throws IOException, URISyntaxException {
         Boot boot = new Boot();
         init();
+        String randomChineseIP = boot.getRandomChineseIP();
+        System.out.println(randomChineseIP);
+
         try {
-            String randomChineseIP = boot.getRandomChineseIP();
-            System.out.println(randomChineseIP);
             String geoForIP = boot.getGeoForIP(randomChineseIP);
             System.out.println(geoForIP);
-        } catch (IOException | GeoIp2Exception e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
