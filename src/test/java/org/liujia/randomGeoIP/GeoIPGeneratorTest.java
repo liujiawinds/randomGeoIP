@@ -8,17 +8,15 @@ import java.net.URISyntaxException;
 /**
  * Created by liujia on 2018/4/18.
  */
-public class BootTest {
+public class GeoIPGeneratorTest {
 
     public static void main(String[] args) throws IOException, URISyntaxException, GeoIp2Exception {
-        Boot.init();
-        Boot boot = new Boot();
+        GeoIPGenerator.init();
+        GeoIPGenerator generator = new GeoIPGenerator();
         long start = System.currentTimeMillis();
-        for (int i = 0; i < 1000; i++) {
-            String randomChineseIP = boot.getRandomChineseIP();
-            System.out.println(randomChineseIP);
-            String geoForIP = boot.getGeoForIP(randomChineseIP);
-            System.out.println(geoForIP);
+        for (int i = 0; i < 10000; i++) {
+            String[] randomGeoIP = generator.getRandomGeoIP();
+            System.out.println(randomGeoIP[0] + "   " + randomGeoIP[1]);
         }
         System.out.println(String.format("cost: %sms", System.currentTimeMillis() - start));
     }

@@ -24,7 +24,7 @@ import java.util.Random;
  * ref: https://github.com/taliu/chinese-random-ip
  * https://www.maxmind.com/zh/geoip-demo
  */
-public class Boot {
+public class GeoIPGenerator {
 
     private Random random = new Random();
     private static DatabaseReader geoDB;
@@ -80,7 +80,7 @@ public class Boot {
             return null;
         }
         Location location = response.getLocation();
-        return location.getLatitude() + "," + location.getLongitude();
+        return location.getLatitude() + "," + location.getLongitude() +"," + response.getCity().getNames().get("zh-CN");
     }
 
     private static String longToIp(long ip) {
@@ -104,17 +104,14 @@ public class Boot {
         return ips;
     }
 
-    public static void main(String[] args) throws IOException, URISyntaxException {
-        Boot boot = new Boot();
-        init();
-        String randomChineseIP = boot.getRandomChineseIP();
-        System.out.println(randomChineseIP);
+    public String[] getRandomGeoIP() throws IOException {
+        String randomChineseIP = getRandomChineseIP();
+        String geoForIP = getGeoForIP(randomChineseIP);
 
-        try {
-            String geoForIP = boot.getGeoForIP(randomChineseIP);
-            System.out.println(geoForIP);
-        } catch (IOException e) {
-            e.printStackTrace();
+        String[] ret = new String[]{randomChineseIP, geoForIP};
+        while (ret[1] == null) {
+            ret = getRandomGeoIP();
         }
+        return ret;
     }
 }
